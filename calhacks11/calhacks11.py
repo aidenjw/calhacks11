@@ -1,5 +1,3 @@
-"""Welcome to Reflex! This file outlines the steps to create a basic app."""
-
 import reflex as rx
 
 from rxconfig import config
@@ -7,33 +5,49 @@ from rxconfig import config
 
 class State(rx.State):
     """The app state."""
-
     ...
 
 
 def index() -> rx.Component:
-    # Welcome Page (Index)
     return rx.container(
-        rx.color_mode.button(position="top-right"),
-        rx.vstack(
-            rx.heading("Welcome to Reflex!", size="9"),
-            rx.text(
-                "Get started by editing ",
-                rx.code(f"{config.app_name}/{config.app_name}.py"),
-                size="5",
+        rx.flex(
+            rx.box(
+                rx.heading("Summary"),
+                rx.text("Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
+                padding='10px',
+                border='1px solid black',
+                flex=1,
             ),
-            rx.link(
-                rx.button("Check out our docs!"),
-                href="https://reflex.dev/docs/getting-started/introduction/",
-                is_external=True,
+            rx.box(
+                rx.heading("Questions"),
+                rx.text("Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."),
+                padding='10px',
+                border='1px solid black',
+                flex=1,
             ),
-            spacing="5",
-            justify="center",
-            min_height="85vh",
+            rx.box(
+                rx.heading("Talking Suggestions"),
+                rx.text("Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."),
+                padding='10px',
+                border='1px solid black',
+                flex=1,
+            ),
+            direction='row',
+            width='100%',
+            justify_content='space-between',
         ),
-        rx.logo(),
     )
 
 
-app = rx.App()
+style = {
+    rx.text: {
+        "font_family": "Comic Sans MS",
+    },
+    rx.box: {
+        "font_family": "Comic Sans MS",
+        "display": "inline-block",
+    },
+}
+
+app = rx.App(style=style)
 app.add_page(index)
