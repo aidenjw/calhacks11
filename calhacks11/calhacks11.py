@@ -1,7 +1,5 @@
-# calhacks11.py
 import os
 import reflex as rx
-#from calhacks11.frontend.state import State
 from backend import main
 from openai import OpenAI
 from pydantic import Field
@@ -19,8 +17,7 @@ class TimerState(rx.State):
         self.count += 1
         global stopwatch
         stopwatch = self.count
-        FormInputState.handle_submit()
-        return TimerState.tick
+        return
 
 class FormInputState(rx.State):
     assistant_id: str = ''
@@ -29,7 +26,8 @@ class FormInputState(rx.State):
     summary: str = ''
     suggestions: str = ''
     watch_display: str = ''
-    
+
+
 
 
     def init_assistant_and_conversation(self):
@@ -42,7 +40,6 @@ class FormInputState(rx.State):
 
     def handle_submit(self, form_data: dict):
         self.init_assistant_and_conversation()
-        # Get the response as a dictionary
         global stopwatch
         try:
             stopwatch
@@ -56,7 +53,11 @@ class FormInputState(rx.State):
 
 
     
-    # Function to create the assistant
+            
+
+
+    
+    # Creating assistant
 def createAssistant():
     assistant = OpenAI.client.beta.assistants.create(
         name="Mental Health Assistant", 
@@ -64,29 +65,38 @@ def createAssistant():
         tools=[{"type": "file_search"}],
         model="gpt-4"
     )
-    return assistant  # This will have an 'id' attribute
+    return assistant 
 
-# Function to open a new conversation thread
+
+# Opening new conversation thread
 def openConversation():
     thread = OpenAI.client.beta.threads.create()
-    return thread  # This will have an 'id' attribute
+    return thread 
 
 
-
-    @rx.var
-    def response(self) -> str:
-        return self.form_data.get('response', '')
-
-
-
+# Widget handling
     
 def index() -> rx.Component:
     global start_time
     start_time = time.time()
     return rx.container(
         rx.flex(
-            # Left column: Summary, Suggestions
+            
+            # Left column: Summary and Suggestions
             rx.vstack(
+                rx.box(
+                    rx.heading("Crisis Companion", size="9", style={"text_decoration": "underline"}),
+                    style={
+                    "text_align": "center",},
+                    padding="20px",
+                    border="2px solid #000",
+                    border_radius="10px",
+                    box_shadow="lg",
+                    margin="10px 0",
+                    width="100%",
+                    background_color="#b19e9a",
+                    color="#000000",
+                ),
                 rx.box(
                     rx.heading("Summary", size="lg", style={"text_decoration": "underline"}),
                     rx.text(
@@ -106,7 +116,7 @@ def index() -> rx.Component:
                 rx.box(
                     rx.heading("Suggestions", size="lg", style={"text_decoration": "underline"}),
                     rx.markdown(
-                        FormInputState.suggestions,  # Directly use markdown format
+                        FormInputState.suggestions, 
                         font_size="md",
                         padding="10px",
                     ),
@@ -120,16 +130,8 @@ def index() -> rx.Component:
                     color="#000000",
                 ),
 
-                rx.vstack(
-                    rx.text(TimerState.count,
-                    )
-                    
-                ),
+            
                 
-                # TODO: REMOVE
-                rx.box(
-                    main.currTranscription('backend/Operator.mp3', 'backend/Caller.mp3', 100)
-                ),
                 spacing="20px",
                 width="65%",
                 align_items="stretch",
@@ -145,8 +147,9 @@ def index() -> rx.Component:
                                 placeholder='Prompt',
                                 type='text',
                                 required=True,
+                                
                             ),
-                            rx.button('Submit', type='submit'),
+                            rx.button('Submit', type='submit', height = "20px"),
                             position='relative',
                         ),
                         on_submit=FormInputState.handle_submit,
@@ -159,11 +162,12 @@ def index() -> rx.Component:
                         style={"white_space": "pre-wrap"},  # Preserve line breaks
                     ),
                 ),
-                width="30%",
-                padding="20px",
-                border_radius="10px",
-                box_shadow="lg",
-                background_color="#A9A9A9",
+            width="30%",
+            padding="20px",
+            border_radius="10px",
+            box_shadow="lg",
+            background_color="#A9A9A9",
+            style={"margin_top": "100px"},
             ),
             direction="row",
             width="100%",
@@ -206,11 +210,9 @@ style = {
 
 
 
-
-
+# runtime app creation
 
 app = rx.App(
-    #state=State,
     style=style,
 )
 

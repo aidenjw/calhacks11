@@ -3,26 +3,18 @@ import os
 from openai import OpenAI
 import json
 from deepgram import (
-    DeepgramClient,
-    LiveTranscriptionEvents,
     LiveOptions,
-    DeepgramClientOptions,
     PrerecordedOptions
 )
 import ast
 import subprocess
-import threading
-import time
-import requests
 
-# Get API keys from environment variables
-openai_api_key = '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'
-deepgram_api_key = 'b8914720e80100689c2d3d53e54088bbc9772b6e'
+openai_api_key = 'YOUR_API_KEY'
+deepgram_api_key = 'YOUR_API_KEY'
 
-# Initialize the OpenAI client
+# Initialize openai client
 client = OpenAI(api_key=openai_api_key)
 
-# Function to create the assistant
 def createAssistant():
     assistant = client.beta.assistants.create(
         name="Mental Health Assistant", 
@@ -32,12 +24,12 @@ def createAssistant():
             "and answer any questions the volunteer asks."
         ),
         tools=[{"type": "file_search", "type" : "code_interpreter"}],
-        model="gpt-4o"  # Ensure this model name is correct
+        model="gpt-4o" 
     )
     return assistant
 
 
-# Function to upload files to the assistant's vector store
+# Uploading files to the assistant
 def uploadFiles(assistantname, files):
     vector_store = client.beta.vector_stores.create(name="Mental Health Documents")
     file_paths = files
@@ -50,44 +42,33 @@ def uploadFiles(assistantname, files):
         tool_resources={"file_search": {"vector_store_ids": [vector_store.id]}}
     )
 
-# Function to open a new conversation thread
+# Conv logic
+
 def openConversation():
     thread = client.beta.threads.create()
     return thread
 
-# Function to ask a question in the conversation
 def askQuestion(thread, query):
-    # Ask a question in the conversation
     message = client.beta.threads.messages.create(
         thread_id=thread.id,
         role="user",
-        content=[{"type": "text", "text": query}]  # Corrected format
+        content=[{"type": "text", "text": query}]  #corrects format don't remove
     )
 
 
-# Main logic to create an assistant, upload files, and handle a conversation
-# main.py
-
-# ... existing imports and code ...
-
-# Function to handle the conversation
-# main.py
 
 def handleConversation(conversation_id, assistant_id, query, time):
     time = time % 60
 
     print(f"Adding user message to conversation {conversation_id}: {query}")
-    # Add the user's message to the conversation
     client.beta.threads.messages.create(
         thread_id=conversation_id,
         role="user",
         content=[{"type": "text", "text": query}]
     )
 
-    # Fetch the updated conversation messages
     messages = client.beta.threads.messages.list(thread_id=conversation_id).data
 
-    # Prepare the messages for the assistant
     assistant_messages = []
     for msg in messages:
         content_text = ''.join(
@@ -103,7 +84,7 @@ def handleConversation(conversation_id, assistant_id, query, time):
         print(f"{msg['role']}: {msg['content']}")
     history = currTranscription("backend/Operator.mp3","backend/Caller.mp3", time)
 
-    # Run the assistant with the conversation messages
+    # Run assistant
     run = client.beta.threads.runs.create_and_poll(
         thread_id=conversation_id,
         assistant_id=assistant_id,
@@ -124,7 +105,6 @@ def handleConversation(conversation_id, assistant_id, query, time):
     print(f"Run status: {run.status}")
 
     if run.status == 'completed':
-        # Fetch the latest assistant message
         messages = client.beta.threads.messages.list(thread_id=conversation_id)
         assistant_messages = [msg for msg in messages.data if msg.role == 'assistant']
         if assistant_messages:
@@ -134,13 +114,12 @@ def handleConversation(conversation_id, assistant_id, query, time):
             response = ''.join(text_parts)
             print(f"Assistant response: {response}")
 
-            # Parse the assistant's response as JSON
+            #Parse the assistant's response as JSON
             try:
                 response_dict = json.loads(response)
                 return response_dict
             except json.JSONDecodeError:
                 print("Failed to parse assistant response as JSON.")
-                # Return the full response under 'full_response' key
                 return {
                     'summary': '',
                     'suggestions': '',
