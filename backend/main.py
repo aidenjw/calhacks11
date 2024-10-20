@@ -19,7 +19,7 @@ def createAssistant():
             "Use the conversation history to provide helpful suggestions "
             "and answer any questions the volunteer asks."
         ),
-        tools=[{"type": "file_search"}],
+        tools=[{"type": "file_search", "type" : "code_interpreter"}],
         model="gpt-4o"  # Ensure this model name is correct
     )
     return assistant
@@ -59,6 +59,8 @@ def askQuestion(thread, query):
 # ... existing imports and code ...
 
 # Function to handle the conversation
+# main.py
+
 def handleConversation(conversation_id, assistant_id, query):
     print(f"Adding user message to conversation {conversation_id}: {query}")
     # Add the user's message to the conversation
@@ -87,16 +89,20 @@ def handleConversation(conversation_id, assistant_id, query):
         print(f"{msg['role']}: {msg['content']}")
 
     # Run the assistant with the conversation messages
-    # Modify the instructions to request JSON output
     run = client.beta.threads.runs.create_and_poll(
         thread_id=conversation_id,
         assistant_id=assistant_id,
         instructions=(
             "You are an assistant helping a suicide hotline volunteer. "
             "Use the conversation history to provide helpful suggestions "
-            "and answer any questions the volunteer asks.\n"
+            "and answer any questions the volunteer asks. Only the hotline worker/volunteer can view your responses.\n"
             "Please provide your response in the following JSON format:\n"
-            "{ \"summary\": \"...\", \"suggestions\": \"...\", \"full_response\": \"...\"}"
+            "{ \"summary\": \"...\", \"suggestions\": \"...\", \"full_response\": \"...\"}\n"
+            "Make the summary less than 30 words. Summarise the entire history of conversation\n"
+            "Make the suggestions a bullet-point list of suggestions like this:\n"
+            "- suggestion one\n- suggestion two\n- suggestion three\n"
+            "For a total of less than 30 words. For the full_response make it less than 30 words. "
+            "The full response is the ongoing conversation that you are having with the hotline volunteer/worker."
         ),
     )
 
@@ -139,3 +145,4 @@ def handleConversation(conversation_id, assistant_id, query):
             'suggestions': '',
             'full_response': "Failed to generate a response."
         }
+

@@ -88,8 +88,8 @@ def index() -> rx.Component:
                 ),
                 rx.box(
                     rx.heading("Suggestions", size="lg", style={"text_decoration": "underline"}),
-                    rx.text(
-                        FormInputState.suggestions,
+                    rx.markdown(
+                        FormInputState.suggestions,  # Directly use markdown format
                         font_size="md",
                         padding="10px",
                     ),
