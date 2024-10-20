@@ -17,6 +17,9 @@ class TimerState(rx.State):
     async def tick(self):
         await asyncio.sleep(1)
         self.count += 1
+        global stopwatch
+        stopwatch = self.count
+        FormInputState.handle_submit()
         return TimerState.tick
 
 class FormInputState(rx.State):
@@ -26,6 +29,7 @@ class FormInputState(rx.State):
     summary: str = ''
     suggestions: str = ''
     watch_display: str = ''
+    
 
 
     def init_assistant_and_conversation(self):
@@ -39,7 +43,12 @@ class FormInputState(rx.State):
     def handle_submit(self, form_data: dict):
         self.init_assistant_and_conversation()
         # Get the response as a dictionary
-        response = main.handleConversation(self.conversation_id, self.assistant_id, form_data['input'])
+        global stopwatch
+        try:
+            stopwatch
+        except NameError:
+            stopwatch = 0
+        response = main.handleConversation(self.conversation_id, self.assistant_id, form_data['input'], stopwatch)
         # Update the state variables
         self.summary = response.get('summary', '')
         self.suggestions = response.get('suggestions', '')
@@ -114,7 +123,6 @@ def index() -> rx.Component:
                 rx.vstack(
                     rx.text(TimerState.count,
                     )
-
                     
                 ),
                 

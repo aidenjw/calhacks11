@@ -73,7 +73,8 @@ def askQuestion(thread, query):
 # Function to handle the conversation
 # main.py
 
-def handleConversation(conversation_id, assistant_id, query):
+def handleConversation(conversation_id, assistant_id, query, time):
+
     print(f"Adding user message to conversation {conversation_id}: {query}")
     # Add the user's message to the conversation
     client.beta.threads.messages.create(
@@ -99,13 +100,14 @@ def handleConversation(conversation_id, assistant_id, query):
     print("Conversation messages:")
     for msg in assistant_messages:
         print(f"{msg['role']}: {msg['content']}")
+    print(time)
 
     # Run the assistant with the conversation messages
     run = client.beta.threads.runs.create_and_poll(
         thread_id=conversation_id,
         assistant_id=assistant_id,
         instructions=(
-            "You are an assistant helping a suicide hotline volunteer. "
+            f"You are an assistant helping a suicide hotline volunteer. You must end your response with {time}."
             "Use the conversation history to provide helpful suggestions "
             "and answer any questions the volunteer asks. Only the hotline worker/volunteer can view your responses.\n"
             "Please provide your response in the following JSON format:\n"
@@ -114,7 +116,7 @@ def handleConversation(conversation_id, assistant_id, query):
             "Make the suggestions a bullet-point list of suggestions like this:\n"
             "- suggestion one\n- suggestion two\n- suggestion three\n"
             "For a total of less than 30 words. For the full_response make it less than 30 words. "
-            "The full response is the ongoing conversation that you are having with the hotline volunteer/worker."
+            f"The full response is the ongoing conversation that you are having with the hotline volunteer/worker. At the end of your response output the number{time}"
         ),
     )
 
