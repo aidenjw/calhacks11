@@ -1,0 +1,79 @@
+/* Stylesheet for page layout */
+
+
+/* General styles for all text elements */
+rx-text {
+    font-family: "Comic Sans MS";
+}
+
+/* General styles for all box elements */
+rx-box {
+    font-family: "Comic Sans MS";
+    display: inline-block;
+}
+
+/* Container style to control the overall layout */
+rx-container {
+    max-width: 1920px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Flex layout for the main boxes */
+rx-flex {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+}
+
+/* Styling for the Summary box */
+.summary-box {
+    width: 40%; /* Takes up 2/5 of the page */
+    padding: 20px;
+    border: 2px solid #000;
+    border-radius: 10px;
+    box-shadow: var(--lg-box-shadow);
+    margin: 10px;
+    background-color: #0202a5;
+}
+
+/* Styling for the Suggestions box */
+.suggestions-box {
+    width: 20%; /* Takes up 1/5 of the page */
+    padding: 20px;
+    border: 2px solid #000;
+    border-radius: 10px;
+    box-shadow: var(--lg-box-shadow);
+    margin: 10px;
+    background-color: #b19e9a;
+}
+
+/* Styling for the Risk Evaluation box */
+.risk-box {
+    width: 20%; /* Takes up 1/5 of the page */
+    padding: 20px;
+    border: 2px solid #000;
+    border-radius: 10px;
+    box-shadow: var(--lg-box-shadow);
+    margin: 10px;
+    background-color: #631505;
+}
+
+/* Remove default margin from headings to align properly */
+rx-heading {
+    margin: 0;
+}
+
+/* Flex child boxes */
+rx-flex > rx-box:nth-child(1) {
+    order: 1;
+}
+
+rx-flex > rx-box:nth-child(2) {
+    order: 2;
+}
+
+rx-flex > rx-box:nth-child(3) {
+    order: 3;
+}
