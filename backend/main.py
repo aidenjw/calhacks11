@@ -2,6 +2,16 @@
 import os
 from openai import OpenAI
 import json
+import os
+from deepgram import (
+    DeepgramClient,
+    LiveTranscriptionEvents,
+    LiveOptions,
+    DeepgramClientOptions,
+    PrerecordedOptions
+)
+import ast
+import subprocess
 
 # Get API keys from environment variables
 openai_api_key = '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'
@@ -139,3 +149,81 @@ def handleConversation(conversation_id, assistant_id, query):
             'suggestions': '',
             'full_response': "Failed to generate a response."
         }
+    
+# Transcription Tools
+
+def words_until(recording1, recording2, time):
+    rec1 = recording1
+    rec2 = recording2
+    command = [
+        'curl',
+        '--request', 'POST',
+        '--header', f'Authorization: Token {DG_KEY}',
+        '--header', 'Content-Type: audio/mp3',
+        '--data-binary', f'@{rec1}',
+        '--url', 'https://api.deepgram.com/v1/listen?diarize=true'
+    ]
+
+    temp1 = subprocess.run(command, stdout=subprocess.PIPE)
+    result1 = ast.literal_eval(temp1.stdout.decode())['results']['channels'][0]['alternatives'][0]['words']
+
+    command = [
+        'curl',
+        '--request', 'POST',
+        '--header', f'Authorization: Token {DG_KEY}',
+        '--header', 'Content-Type: audio/mp3',
+        '--data-binary', f'@{rec2}',
+        '--url', 'https://api.deepgram.com/v1/listen?diarize=true'
+    ]
+
+    temp2 = subprocess.run(command, stdout=subprocess.PIPE)
+    result2 = ast.literal_eval(temp2.stdout.decode())['results']['channels'][0]['alternatives'][0]['words']
+
+    temporary1 = result1
+    result1 = []
+    for entry in temporary1:
+        if entry['end'] <= time:
+            result1.append(entry)
+
+    temporary2 = result2
+    result2 = []
+    for entry in temporary2:
+        if entry['end'] <= time:
+            result2.append(entry)
+    word = []
+
+    def run(res1, res2, lis):
+        if len(res1) == 0 or len(res2) == 0:
+            return []
+        mod1 = res1
+        mod2 = res2
+        lis.append("")
+
+        while True:
+            if mod1[0]['start'] <= res2[0]['start']:
+                lis[-1] += " " + mod1[0]['word'] 
+                mod1 = mod1[1:]
+            else:
+                lis.extend(run(mod2,mod1,[]))
+                break
+
+            if len(mod1) == 0 and len(mod2) != 0:
+                lis.append("")
+                for i in mod2:
+                    lis[-1] += " " + i['word']
+                return lis
+                
+        return lis
+    
+    return run(result1, result2, word)
+    
+def currTranscription(rec1, rec2, time):
+    res = words_until(rec1, rec2, time)[1:]
+    for i in range(len(res)):
+        if i % 2 == 0:
+            res[i] = "Operator: " + res[i]
+        else:
+            res[i] = "Caller: " + res[i]
+    return res
+            
+    
