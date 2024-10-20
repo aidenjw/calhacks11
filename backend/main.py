@@ -9,8 +9,8 @@ from deepgram import (
 import ast
 import subprocess
 
-openai_api_key = 'YOUR_API_KEY'
-deepgram_api_key = 'YOUR_API_KEY'
+openai_api_key = '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'
+deepgram_api_key = 'b8914720e80100689c2d3d53e54088bbc9772b6e'
 
 # Initialize openai client
 client = OpenAI(api_key=openai_api_key)

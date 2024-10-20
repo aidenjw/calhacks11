@@ -13,7 +13,7 @@ class State(rx.State):
 
     async def answer(self):
         client = AsyncOpenAI(
-            api_key='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'
+            api_key='YOUR_API_KEY'
         )
 
         session = await client.chat.completions.create(
