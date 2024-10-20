@@ -102,6 +102,10 @@ def index() -> rx.Component:
                     background_color="#b19e9a",
                     color="#000000",
                 ),
+                # TODO: REMOVE
+                rx.box(
+                    main.currTranscription('backend/Operator.mp3', 'backend/Caller.mp3', 100)
+                ),
                 spacing="20px",
                 width="65%",
                 align_items="stretch",
@@ -109,12 +113,12 @@ def index() -> rx.Component:
             # Right column: Chatbot
             rx.card(
                 rx.vstack(
-                    rx.heading("LAVINYAU"),
+                    rx.heading("Chat"),
                     rx.form.root(
                         rx.hstack(
                             rx.input(
                                 name='input',
-                                placeholder='ASK THE YAU A QUESTION',
+                                placeholder='Prompt',
                                 type='text',
                                 required=True,
                             ),
