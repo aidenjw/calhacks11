@@ -74,6 +74,7 @@ def askQuestion(thread, query):
 # main.py
 
 def handleConversation(conversation_id, assistant_id, query, time):
+    time = time % 60
 
     print(f"Adding user message to conversation {conversation_id}: {query}")
     # Add the user's message to the conversation
@@ -100,23 +101,23 @@ def handleConversation(conversation_id, assistant_id, query, time):
     print("Conversation messages:")
     for msg in assistant_messages:
         print(f"{msg['role']}: {msg['content']}")
-    print(time)
+    history = currTranscription("backend/Operator.mp3","backend/Caller.mp3", time)
 
     # Run the assistant with the conversation messages
     run = client.beta.threads.runs.create_and_poll(
         thread_id=conversation_id,
         assistant_id=assistant_id,
         instructions=(
-            f"You are an assistant helping a suicide hotline volunteer. You must end your response with {time}."
+            "You are an assistant helping a suicide hotline volunteer."
             "Use the conversation history to provide helpful suggestions "
             "and answer any questions the volunteer asks. Only the hotline worker/volunteer can view your responses.\n"
             "Please provide your response in the following JSON format:\n"
             "{ \"summary\": \"...\", \"suggestions\": \"...\", \"full_response\": \"...\"}\n"
-            "Make the summary less than 30 words. Summarise the entire history of conversation\n"
+            f"Make the summary less than 30 words. Summarise the entire history of conversation between the operator and the caller. Ignore the chat history. Most importantly, here is that conversation: {history}\n"
             "Make the suggestions a bullet-point list of suggestions like this:\n"
             "- suggestion one\n- suggestion two\n- suggestion three\n"
             "For a total of less than 30 words. For the full_response make it less than 30 words. "
-            f"The full response is the ongoing conversation that you are having with the hotline volunteer/worker. At the end of your response output the number{time}"
+            "The full response is the ongoing conversation that you are having with the hotline volunteer/worker.  "
         ),
     )
 
