@@ -1,123 +1,171 @@
+# calhacks11.py
 import os
 import reflex as rx
-from state import State
+#from calhacks11.frontend.state import State
+from backend import main
+from openai import OpenAI
+from pydantic import Field
+
+
 
 from rxconfig import config
 
-class State(rx.State):
-    pass
-    
+class State():
+    ...
 
+
+class FormInputState(rx.State):
+    assistant_id: str = ''
+    conversation_id: str = ''
+    response: str = ''
+    summary: str = ''
+    suggestions: str = ''
+    risk_evaluation: str = ''
+
+    def init_assistant_and_conversation(self):
+        if not self.assistant_id:
+            assistant = main.createAssistant()
+            self.assistant_id = assistant.id
+        if not self.conversation_id:
+            conversation = main.openConversation()
+            self.conversation_id = conversation.id
+
+    def handle_submit(self, form_data: dict):
+        self.init_assistant_and_conversation()
+        # Get the response as a dictionary
+        response = main.handleConversation(self.conversation_id, self.assistant_id, form_data['input'])
+        # Update the state variables
+        self.summary = response.get('summary', '')
+        self.suggestions = response.get('suggestions', '')
+        self.risk_evaluation = response.get('risk_evaluation', '')
+        # Optionally update the response state variable if needed
+        self.response = response.get('full_response', '')
+
+
+    
+    # Function to create the assistant
+def createAssistant():
+    assistant = OpenAI.client.beta.assistants.create(
+        name="Mental Health Assistant", 
+        instructions="You are an assistant who is generating prompts to help a professional in talking to someone with mental health concerns. Generate potential responses for what the professional could say/ask", 
+        tools=[{"type": "file_search"}],
+        model="gpt-4"
+    )
+    return assistant  # This will have an 'id' attribute
+
+# Function to open a new conversation thread
+def openConversation():
+    thread = OpenAI.client.beta.threads.create()
+    return thread  # This will have an 'id' attribute
+
+
+
+    @rx.var
+    def response(self) -> str:
+        return self.form_data.get('response', '')
+
+
+
+    
 def index() -> rx.Component:
     return rx.container(
-        # Existing content
         rx.flex(
-            rx.box(
-                rx.heading("Summary", size="lg", style={"text_decoration": "underline"}),
-                rx.text(
-                    "aiden wang aiden wang aiden wang aiden wang aiden wang aiden wang",
-                    font_size="md",
-                    padding="10px",
+            # Left column: Summary, Suggestions, Risk Evaluation
+            rx.vstack(
+                rx.box(
+                    rx.heading("Summary", size="lg", style={"text_decoration": "underline"}),
+                    rx.text(
+                        FormInputState.summary,
+                        font_size="md",
+                        padding="10px",
+                    ),
+                    padding="20px",
+                    border="2px solid #000",
+                    border_radius="10px",
+                    box_shadow="lg",
+                    margin="10px 0",
+                    width="100%",
+                    background_color="#b19e9a",
+                    color="#000000",
                 ),
-                padding="20px",
-                border="2px solid #000",
-                border_radius="10px",
-                box_shadow="lg",
-                margin="10px 0",
-                flex="1",
-                background_color="#b19e9a",
-                color="#000000",
+                rx.box(
+                    rx.heading("Suggestions", size="lg", style={"text_decoration": "underline"}),
+                    rx.text(
+                        FormInputState.suggestions,
+                        font_size="md",
+                        padding="10px",
+                    ),
+                    padding="20px",
+                    border="2px solid #000",
+                    border_radius="10px",
+                    box_shadow="lg",
+                    margin="10px 0",
+                    width="100%",
+                    background_color="#b19e9a",
+                    color="#000000",
+                ),
+                rx.box(
+                    rx.heading("Risk Evaluation", size="lg", style={"text_decoration": "underline"}),
+                    rx.text(
+                        FormInputState.risk_evaluation,
+                        font_size="md",
+                        padding="10px",
+                    ),
+                    padding="20px",
+                    border="2px solid #000",
+                    border_radius="10px",
+                    box_shadow="lg",
+                    margin="10px 0",
+                    width="100%",
+                    background_color="#b19e9a",
+                    color="#000000",
+                ),
+                spacing="20px",
+                width="65%",  # Adjust width as needed
+                align_items="stretch",
             ),
-            rx.box(
-                rx.heading("Suggestions", size="lg", style={"text_decoration": "underline"}),
-                rx.text(
-                    "aiden wang aiden wang aiden wang aiden wang aiden wang aiden wang",
-                    font_size="md",
-                    padding="10px",
+            # Right column: Chatbot
+            rx.card(
+                rx.vstack(
+                    rx.heading("LAVINYAU"),
+                    rx.form.root(
+                        rx.hstack(
+                            rx.input(
+                                name='input',
+                                placeholder='ASK THE YAU A QUESTION',
+                                type='text',
+                                required=True,
+                            ),
+                            rx.button('Submit', type='submit'),
+                            position='relative',
+                        ),
+                        on_submit=FormInputState.handle_submit,
+                        reset_on_submit=True
+                    ),
+                    rx.divider(),
+                    rx.text(
+                        FormInputState.response,
+                        padding="10px",
+                        style={"white_space": "pre-wrap"},  # Preserve line breaks
+                    ),
                 ),
+                width="30%",  # Adjust width as needed
                 padding="20px",
-                border="2px solid #000",
                 border_radius="10px",
                 box_shadow="lg",
-                margin="10px 0",
-                flex="1",
-                background_color="#b19e9a",
-                color="#000000",
-            ),
-            rx.box(
-                rx.heading("Risk Evaluation", size="lg", style={"text_decoration": "underline"}),
-                rx.text(
-                    "aiden wang aiden wang aiden wang aiden wang aiden wang aiden wang",
-                    font_size="md",
-                    padding="10px",
-                ),
-                padding="20px",
-                border="2px solid #000",
-                border_radius="10px",
-                box_shadow="lg",
-                margin="10px 0",
-                flex="1",
-                background_color="#b19e9a",
-                color="#000000",
+                background_color="#A9A9A9",
             ),
             direction="row",
             width="100%",
             justify_content="space-between",
+            align_items="flex-start",
             gap="20px",
-            flex_wrap="wrap",
-        ),
-        # text input
-        rx.box(
-            rx.heading("Prompt", size="lg", style={"text_decoration": "underline"}),
-            rx.form(
-                rx.flex(
-                    rx.input(
-                        name="user_question",
-                        placeholder="Type your question here...",
-                        width="100%",
-                        height="50px",
-                        id="user_question",
-                    ),
-                    rx.button(
-                        "Send",
-                        type="submit",
-                        margin_left="10px",
-                    ),
-                    direction="row",
-                    align_items="center",
-                    width="100%",
-                ),
-                on_submit=State.handle_submit,
-            ),
-            padding="20px",
-            border="2px solid #000",
-            border_radius="10px",
-            box_shadow="lg",
-            margin="20px 0",
-            background_color="#b19e9a",
-            width="100%",
-            color="#000000",
-        ),
-        rx.box(
-            rx.heading("Stored Input", size="lg", style={"text_decoration": "underline"}),
-            rx.text(
-                State.user_question,
-                font_size="md",
-                padding="10px",
-            ),
-            padding="20px",
-            border="2px solid #000",
-            border_radius="10px",
-            box_shadow="lg",
-            margin="20px 0",
-            background_color="#e0e0e0",
-            width="100%",
-            color="#000000",
         ),
         width="100%",
         margin="auto",
         padding="20px",
-        )
+    )
+
 
 
 style = {
@@ -146,7 +194,7 @@ style = {
 }
 
 app = rx.App(
-    state=State,
+    #state=State,
     style=style,
 )
 app.add_page(index)
