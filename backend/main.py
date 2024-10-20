@@ -96,7 +96,7 @@ def handleConversation(conversation_id, assistant_id, query):
             "Use the conversation history to provide helpful suggestions "
             "and answer any questions the volunteer asks.\n"
             "Please provide your response in the following JSON format:\n"
-            "{ 'summary': '...', 'suggestions': '...', 'full_response': '...'}"
+            "{ \"summary\": \"...\", \"suggestions\": \"...\", \"full_response\": \"...\"}"
         ),
     )
 
