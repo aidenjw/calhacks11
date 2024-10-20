@@ -1,6 +1,7 @@
 # main.py
 import os
 from openai import OpenAI
+import json
 
 # Get API keys from environment variables
 openai_api_key = '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'
@@ -86,13 +87,16 @@ def handleConversation(conversation_id, assistant_id, query):
         print(f"{msg['role']}: {msg['content']}")
 
     # Run the assistant with the conversation messages
+    # Modify the instructions to request JSON output
     run = client.beta.threads.runs.create_and_poll(
         thread_id=conversation_id,
         assistant_id=assistant_id,
         instructions=(
             "You are an assistant helping a suicide hotline volunteer. "
             "Use the conversation history to provide helpful suggestions "
-            "and answer any questions the volunteer asks."
+            "and answer any questions the volunteer asks.\n"
+            "Please provide your response in the following JSON format:\n"
+            "{ 'summary': '...', 'suggestions': '...', 'full_response': '...'}"
         ),
     )
 
@@ -108,10 +112,30 @@ def handleConversation(conversation_id, assistant_id, query):
             text_parts = [part.text.value for part in content_parts if part.type == 'text']
             response = ''.join(text_parts)
             print(f"Assistant response: {response}")
-            return response
+
+            # Parse the assistant's response as JSON
+            try:
+                response_dict = json.loads(response)
+                return response_dict
+            except json.JSONDecodeError:
+                print("Failed to parse assistant response as JSON.")
+                # Return the full response under 'full_response' key
+                return {
+                    'summary': '',
+                    'suggestions': '',
+                    'full_response': response
+                }
         else:
             print("No assistant response found.")
-            return "No assistant response found."
+            return {
+                'summary': '',
+                'suggestions': '',
+                'full_response': "No assistant response found."
+            }
     else:
         print("Failed to generate a response.")
-        return "Failed to generate a response."
+        return {
+            'summary': '',
+            'suggestions': '',
+            'full_response': "Failed to generate a response."
+        }

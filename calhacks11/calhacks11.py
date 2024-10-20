@@ -20,7 +20,7 @@ class FormInputState(rx.State):
     response: str = ''
     summary: str = ''
     suggestions: str = ''
-    risk_evaluation: str = ''
+
 
     def init_assistant_and_conversation(self):
         if not self.assistant_id:
@@ -37,8 +37,6 @@ class FormInputState(rx.State):
         # Update the state variables
         self.summary = response.get('summary', '')
         self.suggestions = response.get('suggestions', '')
-        self.risk_evaluation = response.get('risk_evaluation', '')
-        # Optionally update the response state variable if needed
         self.response = response.get('full_response', '')
 
 
@@ -70,7 +68,7 @@ def openConversation():
 def index() -> rx.Component:
     return rx.container(
         rx.flex(
-            # Left column: Summary, Suggestions, Risk Evaluation
+            # Left column: Summary, Suggestions
             rx.vstack(
                 rx.box(
                     rx.heading("Summary", size="lg", style={"text_decoration": "underline"}),
@@ -104,24 +102,8 @@ def index() -> rx.Component:
                     background_color="#b19e9a",
                     color="#000000",
                 ),
-                rx.box(
-                    rx.heading("Risk Evaluation", size="lg", style={"text_decoration": "underline"}),
-                    rx.text(
-                        FormInputState.risk_evaluation,
-                        font_size="md",
-                        padding="10px",
-                    ),
-                    padding="20px",
-                    border="2px solid #000",
-                    border_radius="10px",
-                    box_shadow="lg",
-                    margin="10px 0",
-                    width="100%",
-                    background_color="#b19e9a",
-                    color="#000000",
-                ),
                 spacing="20px",
-                width="65%",  # Adjust width as needed
+                width="65%",
                 align_items="stretch",
             ),
             # Right column: Chatbot
@@ -149,7 +131,7 @@ def index() -> rx.Component:
                         style={"white_space": "pre-wrap"},  # Preserve line breaks
                     ),
                 ),
-                width="30%",  # Adjust width as needed
+                width="30%",
                 padding="20px",
                 border_radius="10px",
                 box_shadow="lg",
@@ -165,6 +147,7 @@ def index() -> rx.Component:
         margin="auto",
         padding="20px",
     )
+
 
 
 
