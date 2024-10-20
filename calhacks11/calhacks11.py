@@ -5,14 +5,19 @@ import reflex as rx
 from backend import main
 from openai import OpenAI
 from pydantic import Field
-
+import time
+import asyncio
 
 
 from rxconfig import config
 
-class State():
-    ...
+class TimerState(rx.State):
+    count: int = 0
 
+    async def tick(self):
+        await asyncio.sleep(1)
+        self.count += 1
+        return TimerState.tick
 
 class FormInputState(rx.State):
     assistant_id: str = ''
@@ -20,6 +25,7 @@ class FormInputState(rx.State):
     response: str = ''
     summary: str = ''
     suggestions: str = ''
+    watch_display: str = ''
 
 
     def init_assistant_and_conversation(self):
@@ -66,6 +72,8 @@ def openConversation():
 
     
 def index() -> rx.Component:
+    global start_time
+    start_time = time.time()
     return rx.container(
         rx.flex(
             # Left column: Summary, Suggestions
@@ -102,6 +110,14 @@ def index() -> rx.Component:
                     background_color="#b19e9a",
                     color="#000000",
                 ),
+
+                rx.vstack(
+                    rx.text(TimerState.count,
+                    )
+
+                    
+                ),
+                
                 # TODO: REMOVE
                 rx.box(
                     main.currTranscription('backend/Operator.mp3', 'backend/Caller.mp3', 100)
@@ -180,8 +196,16 @@ style = {
     },
 }
 
+
+
+
+
+
 app = rx.App(
     #state=State,
     style=style,
 )
-app.add_page(index)
+
+app.add_page(index, on_load = TimerState.tick)
+
+

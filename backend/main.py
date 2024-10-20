@@ -230,5 +230,3 @@ def currTranscription(rec1, rec2, time):
 
 
     return ret
-
-# a
